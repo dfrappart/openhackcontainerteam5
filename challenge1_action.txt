@@ -5,10 +5,10 @@ docker pull mcr.microsoft.com/mssql/server:2017-latest
 docker run -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=SQL@dmin2022" -p 1433:1433 -d mcr.microsoft.com/mssql/server:2017-latest
 
 3 create database in mssql container
-
+docker exec -it sqlserver /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Passw0rd -Q "CREATE DATABASE mydrivingDB"
 
 4 connect to az registry
 az acr login -n registrygzx5650.azurecr.io
 
 5 run container dataload
-docker run --network mynetwork -e SQLFQDN=df500c39b841 -e SQLUSER=SA -e SQLPASS=SQL@dmin202 -e SQLDB=mydrivingDB registrygzx5650.azurecr.io/data-load:1.0
+docker run --network bridge -e SQLFQDN=df500c39b841 -e SQLUSER=SA -e SQLPASS=SQL@dmin202 -e SQLDB=mydrivingDB registrygzx5650.azurecr.io/dataload:1.0
