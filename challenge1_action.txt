@@ -12,3 +12,6 @@ az acr login -n registrygzx5650.azurecr.io
 
 5 run container dataload
 docker run --network bridge -e SQLFQDN=df500c39b841 -e SQLUSER=SA -e SQLPASS=SQL@dmin202 -e SQLDB=mydrivingDB registrygzx5650.azurecr.io/dataload:1.0
+
+6 run poi 
+docker run -d --network demo-network -p 8080:80 --name poi -e "SQL_PASSWORD=Passw0rd" -e "SQL_USER=SA" -e "SQL_SERVER=sqlserver" -e "ASPNETCORE_ENVIRONMENT=Local" tripinsights/poi:1.0
