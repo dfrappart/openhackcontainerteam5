@@ -1,0 +1,17 @@
+1 pull image ms sql
+docker pull mcr.microsoft.com/mssql/server:2017-latest
+
+2 run container ms sql
+docker run --network bridge -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=H24$de17" -e "MSSQL_PID=Express" -p 1433:1433 -d mcr.microsoft.com/mssql/server:latest
+
+3 create database in mssql container
+docker exec -it musing_spence /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P H24$de17 -Q "CREATE DATABASE mydrivingDB"
+
+4 connect to az registry
+docker login registrygzx5650.azurecr.io -u registrygzx5650 -p l2Ehln30vd3nZ9Ke4lr49ND1N/YtkHIp
+
+5 run container dataload
+docker run --network bridge -e SQLFQDN=host.docker.internal -e SQLUSER=SA -e SQLPASS=H24$de17 -e SQLDB=mydrivingDB registrygzx5650.azurecr.io/dataload:1.0 
+
+6 run poi 
+docker run --network bridge -d -p 8080:80 --name poi -e "SQL_USER=SA" -e "SQL_PASSWORD=H24$de17" -e "SQL_SERVER=host.docker.internal" -e "SQL_PASSWORD=H24$de17" -e "SQL_DBNAME=mydrivingDB" -e "ASPNETCORE_ENVIRONMENT=Local" tripinsights/poi:1.0
