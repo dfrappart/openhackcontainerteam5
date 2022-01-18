@@ -1,17 +1,24 @@
 1 pull image ms sql
 docker pull mcr.microsoft.com/mssql/server:2017-latest
 
+1.1 créer network
+docker network create demo-network
+
 2 run container ms sql
-docker run -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=SQL@dmin2022" -p 1433:1433 -d mcr.microsoft.com/mssql/server:2017-latest
+docker run -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=SQL@dmin2022" -p 1433:1433 -d mcr.microsoft.com/mssql/server:2017-latest --network demo-network --name sqlserver
 
 3 create database in mssql container
-docker exec -it sqlserver /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Passw0rd -Q "CREATE DATABASE mydrivingDB"
+docker exec -it sqlserver /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P SQL@dmin2022 -Q "CREATE DATABASE mydrivingDB"
 
 4 connect to az registry
+az login 
 az acr login -n registrygzx5650.azurecr.io
 
 5 run container dataload
-docker run --network bridge -e SQLFQDN=df500c39b841 -e SQLUSER=SA -e SQLPASS=SQL@dmin202 -e SQLDB=mydrivingDB registrygzx5650.azurecr.io/dataload:1.0
+docker run --network demo-network -e SQLFQDN=sqlserver -e SQLUSER=sa -e SQLPASS=SQL@dmin2022 -e SQLDB=mydrivingDB registrygzx5650.azurecr.io/dataload:1.0
 
-6 run poi 
-docker run -d --network demo-network -p 8080:80 --name poi -e "SQL_PASSWORD=Passw0rd" -e "SQL_USER=SA" -e "SQL_SERVER=sqlserver" -e "ASPNETCORE_ENVIRONMENT=Local" tripinsights/poi:1.0
+6 build container POI. Se mettre sur le dossier SRC POI
+docker build -f Dockerfile -t "tripinsights/poi:1.0" .
+
+7 run poi 
+docker run -d --network demo-network -p 8080:80 --name poi -e "SQL_PASSWORD=SQL@dmin2022" -e "SQL_USER=sa" -e "SQL_SERVER=sqlserver" -e "ASPNETCORE_ENVIRONMENT=Local" tripinsights/poi:1.0
