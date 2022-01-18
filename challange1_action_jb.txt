@@ -13,5 +13,8 @@ docker login registrygzx5650.azurecr.io -u registrygzx5650 -p l2Ehln30vd3nZ9Ke4l
 5 run container dataload
 docker run --network bridge -e SQLFQDN=host.docker.internal -e SQLUSER=SA -e SQLPASS=H24$de17 -e SQLDB=mydrivingDB registrygzx5650.azurecr.io/dataload:1.0 
 
-6 run poi 
+6 build poi
+docker build -f Dockerfile -t "tripinsights/poi:1.0" .
+
+7 run poi 
 docker run --network bridge -d -p 8080:80 --name poi -e "SQL_USER=SA" -e "SQL_PASSWORD=H24$de17" -e "SQL_SERVER=host.docker.internal" -e "SQL_PASSWORD=H24$de17" -e "SQL_DBNAME=mydrivingDB" -e "ASPNETCORE_ENVIRONMENT=Local" tripinsights/poi:1.0
