@@ -1,15 +1,16 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  creationTimestamp: null
   labels:
     tier: tripviewer
-  name: tripinsights/tripviewer
+  name: tripviewer
 spec:
   containers:
-  - image: registrygzx5650.azurecr.io/tripinsights/tripviewer
-    name: tripinsights/tripviewer
-    resources: {}
-  dnsPolicy: ClusterFirst
-  restartPolicy: Always
-status: {}
+  - image: registrygzx5650.azurecr.io/tripinsights/tripviewer:1.0
+    name: poi
+    env:
+
+    - name: USERPROFILE_API_ENDPOINT
+      value: http://localhost
+    - name: TRIPS_API_ENDPOINT
+      value: http://localhost
