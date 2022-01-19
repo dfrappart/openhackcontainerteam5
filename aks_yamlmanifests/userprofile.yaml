@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    tier: userprofile
+  name: userprofile
+spec:
+  containers:
+  - image: registrygzx5650.azurecr.io/userprofile
+    name: userprofile
+    resources: {}
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
+status: {}

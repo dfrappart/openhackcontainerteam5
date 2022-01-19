@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    tier: tripviewer
+  name: tripinsights/tripviewer
+spec:
+  containers:
+  - image: registrygzx5650.azurecr.io/poi
+    name: tripinsights/tripviewer
+    resources: {}
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
+status: {}
