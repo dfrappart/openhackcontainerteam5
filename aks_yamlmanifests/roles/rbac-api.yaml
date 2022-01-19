@@ -1,0 +1,45 @@
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: api-edit
+  namespace: api
+rules:
+- apiGroups: [""]
+  resources: ["*"]
+  verbs: ["*"]
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: api-view
+  namespace: api
+rules:
+- apiGroups: [""]
+  resources: ["get","list","watch"]
+  verbs: ["*"]
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: api-edit-binding
+  namespace: api
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: api-edit
+subjects:
+- kind: Group
+  name: 18f365b7-568b-416a-a587-3c3bebad5acb
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: api-view-binding
+  namespace: api
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: api-view
+subjects:
+- kind: Group
+  name: 017f5d49-4e54-44dd-b6a2-782e1d72f548
