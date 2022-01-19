@@ -1,15 +1,23 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  creationTimestamp: null
   labels:
     tier: poi
   name: poi
 spec:
   containers:
-  - image: registrygzx5650.azurecr.io/poi
+  - image: registrygzx5650.azurecr.io/poi:1.0
     name: poi
-    resources: {}
-  dnsPolicy: ClusterFirst
-  restartPolicy: Always
-status: {}
+    env:
+    - name: SQL_USER
+      valueFrom:
+        secretKeyRef:
+          name: db-user-pass
+          key: SQL_USER
+    - name: SQL_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: db-user-pass
+          key: SQL_PASSWORD
+    - name: SQL_SERVER
+      value: sqlservergzx5650.database.windows.net
