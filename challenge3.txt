@@ -1,6 +1,12 @@
 # Connect to the cluster
-az aks get-credentials name TeamHacker5Prod --resource-group rg-Hacker05
+az aks get-credentials --name TeamHacker5Prod --resource-group rg-Hacker05
+
+# Create namespaces
+kubectl create -f ./api-ns.yaml
+kubectl create -f ./web-ns.yaml
+
+# Check results
+kubectl get namespace
 
 # Apply all manifests to the cluster 
 kubectl apply -f openhackcontainerteam5/aks_yamlmanifests/
-
