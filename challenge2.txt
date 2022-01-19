@@ -22,7 +22,14 @@ docker tag tripinsights/poi:1.0 registrygzx5650.azurecr.io/poi:1.0
 4.push image poi
 docker push registrygzx5650.azurecr.io/poi:1.0
 
-
+# Display the list of AKS clusters (as a table) and retrieve the infos for the next command
+az aks list -o table
 
 # Get kubernetes credentials
 az aks get-credentials  name TeamHacker5  --resource-group rg-Hacker05
+
+# Apply the manifest of poi to the cluster
+kubectl apply -f openhackcontainerteam5/aks_yamlmanifests/poi.yaml
+
+# Check pods' status
+kubectl get pods
