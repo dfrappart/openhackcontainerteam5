@@ -3,7 +3,7 @@ kind: Service
 metadata:
   name: poi-service
 spec:
-  type: ClusterIP
+  type: LoadBalancer
   selector:
     tier: poi
   ports:

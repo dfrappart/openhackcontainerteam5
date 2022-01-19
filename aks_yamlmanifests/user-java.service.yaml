@@ -3,7 +3,7 @@ kind: Service
 metadata:
   name: userjava-service
 spec:
-  type: ClusterIP
+  type: LoadBalancer
   selector:
     tier: user-java
   ports:
