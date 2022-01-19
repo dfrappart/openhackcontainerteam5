@@ -13,4 +13,5 @@ spec:
           value: http://userprofile-service
         - name: TRIPS_API_ENDPOINT
           value: http://trips-service
-
+        - name: BING_MAPS_KEY
+          value: AorvfqiCAbQjxEJmPZuc1UtaTuXaq3qPuLZmAVG_7smaOgiG3_hyE39FVhfo6opL
