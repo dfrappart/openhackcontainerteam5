@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: trips-deployment
+  labels:
+    app: trips
+  namespace: api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: trips
+  template:
+    metadata:
+      labels:
+        app: trips
+    spec:
+      containers:
+      - name: trips
+        image: registrygzx5650.azurecr.io/trips:1.0
+        ports:
+        - containerPort: 80
+        env:
+        - name: PORT
+          value : "80"
+        - name: SQL_SERVER
+          value : sqlservergzx5650.database.windows.net
+        - name: SQL_DBNAME
+          value : mydrivingDB
+        envFrom:
+        - secretRef: 
+            name: db-user-pass
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: trips-service
+  namespace: api
+spec:
+  type: ClusterIP
+  selector:
+    app: trips
+  ports:
+  - protocol: TCP
+    name: http
+    port: 80
+    targetPort: 80
+  - protocol: TCP
+    name: https
+    port: 443
+    targetPort: 443
+
