@@ -9,3 +9,15 @@ az acr login -n registrygzx5650.azurecr.io
 
 4.push image trips
 docker push registrygzx5650.azurecr.io/trips:1.0
+
+
+
+## POI
+1.build image (se metre sous le dossier qui contien le fichier Dockerfile)
+docker build -f Dockerfile -t "poi:1.0" .
+
+2.tagger l'image
+docker tag tripinsights/poi:1.0 registrygzx5650.azurecr.io/poi:1.0
+
+4.push image poi
+docker push registrygzx5650.azurecr.io/poi:1.0
