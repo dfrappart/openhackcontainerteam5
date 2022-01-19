@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    tier: poi
+  name: poi
+spec:
+  containers:
+  - image: registrygzx5650.azurecr.io/poi
+    name: poi
+    resources: {}
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
+status: {}

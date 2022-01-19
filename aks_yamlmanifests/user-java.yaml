@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    tier: user-java
+  name: user-java
+spec:
+  containers:
+  - image: registrygzx5650.azurecr.io/user-java
+    name: user-java
+    resources: {}
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
+status: {}
