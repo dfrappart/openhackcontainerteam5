@@ -10,7 +10,7 @@ spec:
       name: tripviewer
       env:
         - name: USERPROFILE_API_ENDPOINT
-          value: http://localhost
+          value: http://userprofile-service
         - name: TRIPS_API_ENDPOINT
-          value: http://localhost
+          value: http://trips-service
 
