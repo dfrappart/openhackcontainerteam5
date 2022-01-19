@@ -4,6 +4,7 @@ metadata:
   labels:
     tier: trips
   name: trips
+  namespace: api
 spec:
   containers:
     - image: registrygzx5650.azurecr.io/trips:1.0

@@ -4,6 +4,7 @@ metadata:
   labels:
     tier: poi
   name: poi
+  namespace: api
 spec:
   containers:
   - image: registrygzx5650.azurecr.io/poi:1.0

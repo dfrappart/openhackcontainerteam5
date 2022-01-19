@@ -4,6 +4,7 @@ metadata:
   labels:
     tier: tripviewer
   name: tripviewer
+  namespace: web
 spec:
   containers:
     - image: registrygzx5650.azurecr.io/tripinsights/tripviewer:1.0
