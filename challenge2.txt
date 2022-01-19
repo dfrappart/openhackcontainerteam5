@@ -33,3 +33,7 @@ kubectl apply -f openhackcontainerteam5/aks_yamlmanifests/poi.yaml
 
 # Check pods' status
 kubectl get pods
+
+
+# Deploy Trips 
+kubectl apply -f openhackcontainerteam5/aks_yamlmanifests/trips.yaml
