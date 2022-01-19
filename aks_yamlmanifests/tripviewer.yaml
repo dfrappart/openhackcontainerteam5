@@ -6,11 +6,11 @@ metadata:
   name: tripviewer
 spec:
   containers:
-  - image: registrygzx5650.azurecr.io/tripinsights/tripviewer:1.0
-    name: poi
-    env:
+    - image: registrygzx5650.azurecr.io/tripinsights/tripviewer:1.0
+      name: tripviewer
+      env:
+        - name: USERPROFILE_API_ENDPOINT
+          value: http://localhost
+        - name: TRIPS_API_ENDPOINT
+          value: http://localhost
 
-    - name: USERPROFILE_API_ENDPOINT
-      value: http://localhost
-    - name: TRIPS_API_ENDPOINT
-      value: http://localhost
