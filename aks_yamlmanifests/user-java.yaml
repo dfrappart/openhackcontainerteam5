@@ -9,7 +9,7 @@ spec:
   containers:
   - image: registrygzx5650.azurecr.io/user-java:1.0
     name: user-java
-      env:
+    env:
         - name: SQL_USER
           valueFrom:
             secretKeyRef:
