@@ -5,6 +5,7 @@ metadata:
   labels:
     tier: user-java
   name: user-java
+  namespace: api
 spec:
   containers:
   - image: registrygzx5650.azurecr.io/user-java:1.0

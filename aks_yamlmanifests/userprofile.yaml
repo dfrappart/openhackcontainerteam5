@@ -4,6 +4,7 @@ metadata:
   labels:
     tier: userprofile
   name: userprofile
+  namespace: api
 spec:
   containers:
     - image: registrygzx5650.azurecr.io/userprofile:1.0

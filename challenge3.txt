@@ -1,0 +1,6 @@
+# Connect to the cluster
+az aks get-credentials name TeamHacker5Prod --resource-group rg-Hacker05
+
+# Apply all manifests to the cluster 
+kubectl apply -f openhackcontainerteam5/aks_yamlmanifests/
+
