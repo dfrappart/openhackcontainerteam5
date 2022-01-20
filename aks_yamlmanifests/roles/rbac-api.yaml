@@ -15,8 +15,8 @@ metadata:
   namespace: api
 rules:
 - apiGroups: [""]
-  resources: ["get","list","watch"]
-  verbs: ["*"]
+  resources: ["*"]
+  verbs: ["get","list","watch"]  
 ---
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
