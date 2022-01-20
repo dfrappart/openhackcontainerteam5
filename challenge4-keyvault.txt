@@ -2,4 +2,11 @@
 az aks show --resource-group rg-Hacker05 -n TeamHacker5Prod --query "servicePrincipalProfile"
 az aks show --resource-group rg-Hacker05 -n TeamHacker5Prod --query "identity"
 
+# Install csi-secret-store
+helm repo add secrets-store-csi-driver https://raw.githubusercontent.com/kubernetes-sigs/secrets-store-csi-driver/master/charts
+helm install csi-secrets-store secrets-store-csi-driver/secrets-store-csi-driver
 
+# Create manifest for secretProvider and apply to the cluster
+kubectl apply -f secretproviderclass.yaml
+  
+  
