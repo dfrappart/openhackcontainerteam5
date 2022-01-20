@@ -9,15 +9,25 @@ spec:
   containers:
   - image: registrygzx5650.azurecr.io/trips:1.0
     name: trips
-    env:
+    env:        
       - name: SQL_SERVER
         value: sqlservergzx5650.database.windows.net
+      - name: SQL_USER
+        valueFrom:
+            secretKeyRef:
+              name: sql-user-secret
+              key: user
+      - name: SQL_PASSWORD
+        valueFrom:
+            secretKeyRef:
+              name: sql-password-secret
+              key: password
       - name: OPENAPI_DOCS_URI
         value: http://localhost
     volumeMounts:
-      - name: vm-secrets-hacker05
-        mountPath: "/mnt/secrets-store"
-        readOnly: true
+    - name: vm-secrets-hacker05
+      mountPath: "/mnt/secrets-store"
+      readOnly: true
   volumes:
   - name: vm-secrets-hacker05
     csi:

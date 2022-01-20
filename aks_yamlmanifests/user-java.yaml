@@ -10,13 +10,23 @@ spec:
   containers:
   - image: registrygzx5650.azurecr.io/user-java:1.0
     name: user-java
-    env:
+    env:        
       - name: SQL_SERVER
         value: sqlservergzx5650.database.windows.net
-volumeMounts:
-      - name: vm-secrets-hacker05
-        mountPath: "/mnt/secrets-store"
-        readOnly: true
+      - name: SQL_USER
+        valueFrom:
+            secretKeyRef:
+              name: sql-user-secret
+              key: user
+      - name: SQL_PASSWORD
+        valueFrom:
+            secretKeyRef:
+              name: sql-password-secret
+              key: password
+    volumeMounts:
+    - name: vm-secrets-hacker05
+      mountPath: "/mnt/secrets-store"
+      readOnly: true
   volumes:
   - name: vm-secrets-hacker05
     csi:
