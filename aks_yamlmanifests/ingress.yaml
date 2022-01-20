@@ -8,7 +8,7 @@ metadata:
     nginx.ingress.kubernetes.io/default-backend: tripviewer-service
 spec:
   rules:
-      - path: /(.*)
+      - path: /
         pathType: Prefix
         backend:
           service:
