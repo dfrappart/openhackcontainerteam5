@@ -1,0 +1,5 @@
+# Verify that cluster identities are bound to the AAD   
+az aks show --resource-group rg-Hacker05 -n TeamHacker5Prod --query "servicePrincipalProfile"
+az aks show --resource-group rg-Hacker05 -n TeamHacker5Prod --query "identity"
+
+
