@@ -10,17 +10,18 @@ spec:
     - image: registrygzx5650.azurecr.io/trips:1.0
       name: trips
       env:
-        - name: SQL_USER
-          valueFrom:
-            secretKeyRef:
-              name: db-user-pass
-              key: SQL_USER
-        - name: SQL_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: db-user-pass
-              key: SQL_PASSWORD
         - name: SQL_SERVER
           value: sqlservergzx5650.database.windows.net
         - name: OPENAPI_DOCS_URI
           value: http://localhost
+    volumeMounts:
+      - name: vm-secrets-hacker05
+        mountPath: "/mnt/secrets-store"
+        readOnly: true
+  volumes:
+  - name: vm-secrets-hacker05
+    csi:
+      driver: secrets-store.csi.k8s.io
+      readOnly: true
+      volumeAttributes:
+        secretProviderClass: "oh5kv"
