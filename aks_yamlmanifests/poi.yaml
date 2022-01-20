@@ -10,8 +10,18 @@ spec:
   - name: poi
     image: registrygzx5650.azurecr.io/poi:1.0    
     env:        
-    - name: SQL_SERVER
-      value: sqlservergzx5650.database.windows.net
+      - name: SQL_SERVER
+        value: sqlservergzx5650.database.windows.net
+      - name: SQL_USER
+        valueFrom:
+            secretKeyRef:
+              name: sql-user-secret
+              key: user
+      - name: SQL_PASSWORD
+        valueFrom:
+            secretKeyRef:
+              name: sql-password-secret
+              key: password
     volumeMounts:
     - name: vm-secrets-hacker05
       mountPath: "/mnt/secrets-store"
