@@ -7,13 +7,13 @@ metadata:
   namespace: api
 spec:
   containers:
-    - image: registrygzx5650.azurecr.io/trips:1.0
-      name: trips
-      env:
-        - name: SQL_SERVER
-          value: sqlservergzx5650.database.windows.net
-        - name: OPENAPI_DOCS_URI
-          value: http://localhost
+  - image: registrygzx5650.azurecr.io/trips:1.0
+    name: trips
+    env:
+      - name: SQL_SERVER
+        value: sqlservergzx5650.database.windows.net
+      - name: OPENAPI_DOCS_URI
+        value: http://localhost
     volumeMounts:
       - name: vm-secrets-hacker05
         mountPath: "/mnt/secrets-store"

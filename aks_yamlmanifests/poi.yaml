@@ -1,10 +1,10 @@
 apiVersion: v1
 kind: Pod
 metadata:
+  name: poi
   labels:
     tier: poi
-  name: poi  
-  namespace: api  
+  namespace: api 
 spec:
   containers:
   - name: poi
