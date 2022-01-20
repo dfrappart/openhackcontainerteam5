@@ -13,9 +13,9 @@ spec:
     - name: SQL_SERVER
       value: sqlservergzx5650.database.windows.net
     volumeMounts:
-      - name: vm-secrets-hacker05
-        mountPath: "/mnt/secrets-store"
-        readOnly: true
+    - name: vm-secrets-hacker05
+      mountPath: "/mnt/secrets-store"
+      readOnly: true
   volumes:
   - name: vm-secrets-hacker05
     csi:
