@@ -1,0 +1,18 @@
+1.Ajouter CSI
+ az aks enable-addons --addons azure-keyvault-secrets-provider --name TeamHacker5Prod --resource-group rg-Hacker05 
+2. Ajouter les permissions pour l'agent pool
+ az aks show -g rg-Hacker05 -n TeamHacker5Prod --query identityProfile.kubeletidentity.clientId -o tsv     
+3.Mettre à jour userAssignedIdentityID avec le résultat de 2.
+userAssignedIdentityID: "771472e8-8920-47d2-a64b-7448a4be2ecd"
+4.Exécuter le fichier secretproviderclass.yaml
+kubectl apply -f "secretproviderclass.yaml"
+
+----
+1. Ajouter ingress
+NAMESPACE=ingress-basic
+helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+helm repo update
+helm install ingress-nginx ingress-nginx/ingress-nginx --create-namespace --namespace $NAMESPACE 
+
+2. Exécuter le fichier ingress.yaml
+kubectl apply ingress.yaml
