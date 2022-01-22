@@ -1,0 +1,74 @@
+--------------Challenge 7------------------------POD identity
+Créer une identité
+az group create --name myIdentityResourceGroup --location eastus
+{
+  "id": "/subscriptions/7b8ab5b5-0b57-470b-b81b-36f3d35c159a/resourceGroups/myIdentityResourceGroup",
+  "location": "eastus",
+  "managedBy": null,
+  "name": "myIdentityResourceGroup",
+  "properties": {
+    "provisioningState": "Succeeded"
+  },
+  "tags": null,
+  "type": "Microsoft.Resources/resourceGroups"
+}
+
+az identity create --resource-group myIdentityResourceGroup --name application-identity
+
+{
+  "clientId": "d70942b1-9b2d-4baa-bc44-125cc6343e52",
+  "clientSecretUrl": "https://control-eastus.identity.azure.net/subscriptions/7b8ab5b5-0b57-470b-b81b-36f3d35c159a/resourcegroups/myIdentityResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/application-identity/credentials?tid=a8315874-5df5-41ef-9776-eda87ce523c9&oid=f46e3231-f815-4393-b356-b339ca591ee1&aid=d70942b1-9b2d-4baa-bc44-125cc6343e52",
+  "id": "/subscriptions/7b8ab5b5-0b57-470b-b81b-36f3d35c159a/resourcegroups/myIdentityResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/application-identity",
+  "location": "eastus",
+  "name": "application-identity",
+  "principalId": "f46e3231-f815-4393-b356-b339ca591ee1",
+  "resourceGroup": "myIdentityResourceGroup",
+  "tags": {},
+  "tenantId": "a8315874-5df5-41ef-9776-eda87ce523c9",
+  "type": "Microsoft.ManagedIdentity/userAssignedIdentities"
+}
+
+ 
+az identity show -g myIdentityResourceGroup -n application-identity --query clientId -otsv
+d70942b1-9b2d-4baa-bc44-125cc6343e52
+
+az identity show -g myIdentityResourceGroup -n application-identity --query id -otsv
+/subscriptions/7b8ab5b5-0b57-470b-b81b-36f3d35c159a/resourcegroups/myIdentityResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/application-identity
+
+-----Attribuer des autorisations pour l’identité managée-----
+Pour exécuter la démonstration, l’identité managée IDENTITY_CLIENT_ID doit avoir des autorisations 
+de contributeur de machine virtuelle dans le groupe de ressources qui contient le groupe de machines virtuelles 
+identiques de votre cluster AKS.
+
+1.az aks show -g rg-Hacker05 -n TeamHacker5Prod3 --query nodeResourceGroup -o tsv
+MC_rg-Hacker05_TeamHacker5Prod3_westeurope
+
+2.az group show -n MC_rg-Hacker05_TeamHacker5Prod3_westeurope -o tsv --query "id"
+/subscriptions/7b8ab5b5-0b57-470b-b81b-36f3d35c159a/resourceGroups/MC_rg-Hacker05_TeamHacker5Prod3_westeurope
+
+3.az role assignment create --role "Virtual Machine Contributor" --assignee "d70942b1-9b2d-4baa-bc44-125cc6343e52" --scope /subscriptions/7b8ab5b5-0b57-470b-b81b-36f3d35c159a/resourceGroups/MC_rg-Hacker05_TeamHacker5Prod3_westeurope
+{
+  "canDelegate": null,
+  "condition": null,
+  "conditionVersion": null,
+  "description": null,
+  "id": "/subscriptions/7b8ab5b5-0b57-470b-b81b-36f3d35c159a/resourceGroups/MC_rg-Hacker05_TeamHacker5Prod3_westeurope/providers/Microsoft.Authorization/roleAssignments/feb6ac46-5638-46c2-b336-c1e8d580e34a",
+  "name": "feb6ac46-5638-46c2-b336-c1e8d580e34a",
+  "principalId": "f46e3231-f815-4393-b356-b339ca591ee1",
+  "principalType": "ServicePrincipal",
+  "resourceGroup": "MC_rg-Hacker05_TeamHacker5Prod3_westeurope",
+  "roleDefinitionId": "/subscriptions/7b8ab5b5-0b57-470b-b81b-36f3d35c159a/providers/Microsoft.Authorization/roleDefinitions/9980e02c-c2be-4d73-94e8-173b1dc7cf3c",
+  "scope": "/subscriptions/7b8ab5b5-0b57-470b-b81b-36f3d35c159a/resourceGroups/MC_rg-Hacker05_TeamHacker5Prod3_westeurope",
+  "type": "Microsoft.Authorization/roleAssignments"
+}
+
+-----------Créer une identité de pod-----------
+Créez une identité de pod pour le cluster à l’aide de az aks pod-identity add.
+
+1.Si vous avez cette erreur "The pod identity addon is not enabled for this managed cluster yet." , 
+Exécuter la commande pour activer le pod managé:
+az aks update --resource-group rg-Hacker05 --name TeamHacker5Prod3 --enable-pod-identity --enable-pod-identity-with-kubenet
+
+2. az aks pod-identity add --resource-group rg-Hacker05 --cluster-name TeamHacker5Prod3 --namespace my-app  --name my-pod-identity --identity-resource-id /subscriptions/7b8ab5b5-0b57-470b-b81b-36f3d35c159a/resourcegroups/myIdentityResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/application-identity
+
+
