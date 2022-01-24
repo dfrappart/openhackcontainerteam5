@@ -10,10 +10,6 @@ spec:
   containers:
   - name: trips
     image: registrygzx5650.azurecr.io/trips:1.0
-    args:
-      - --subscriptionid=$SUBSCRIPTION_ID
-      - --clientid=$IDENTITY_CLIENT_ID
-      - --resourcegroup=$IDENTITY_RESOURCE_GROUP  
     env:        
       - name: SQL_SERVER
         value: sqlservergzx5650.database.windows.net
