@@ -1,9 +1,0 @@
-#A vérifier comment l'utiliser, fichier créé pour un simple test.
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: default-deny-ingress
-spec:
-  podSelector: {}
-  policyTypes:
-  - Ingress

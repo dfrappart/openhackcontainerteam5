@@ -1,0 +1,17 @@
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: user-java-policy
+  namespace: api
+spec:
+  podSelector:
+    matchLabels:
+      tier: user-java
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          purpose: api
+      podSelector:
+        matchLabels:
+          tier: userprofile

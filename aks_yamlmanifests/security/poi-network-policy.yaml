@@ -1,0 +1,23 @@
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: poi-policy
+  namespace: api
+spec:
+  podSelector:
+    matchLabels:
+      tier: poi
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          purpose: web
+      podSelector:
+        matchLabels:
+          tier: tripviewer
+    - namespaceSelector:
+        matchLabels:
+          purpose: api
+      podSelector:
+        matchLabels:
+          tier: trips

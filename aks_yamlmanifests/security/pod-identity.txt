@@ -1,0 +1,235 @@
+#Suivre les étapes suivantes pour créer un pod identity
+# https://docs.microsoft.com/fr-fr/azure/aks/use-azure-ad-pod-identity
+
+$seffix= "demo10"
+$subscriptionId = (az account show | ConvertFrom-Json).id
+$tenantId = (az account show | ConvertFrom-Json).tenantId
+$location = "westeurope"
+$resourceGroupName = "rg-" + $seffix
+$aksName = "aks-"+$seffix
+$keyVaultName = "keyvault-"+ $seffix
+$secretProviderClassName = "secret-provider-kv-"+$seffix 
+$secret1Name="SQLPASSWORD"
+$secret2Name="SQLUSER"
+$identityName = "identity-aks-kv-"+ $seffix
+ 
+$IDENTITY_CLIENT_ID="1fc96452-b367-4797-a0b2-f75a54e94938"
+$POD_IDENTITY_NAME="pod-identity-"+$seffix
+$POD_IDENTITY_NAMESPACE="api"
+
+# echo "Creating Resource Group..."
+#  $rg = az group create -n $resourceGroupName -l $location | ConvertFrom-Json
+
+# echo "Creating AKS cluster..." # doesn't work with AKS with Managed Identity!
+#  $aks = az aks create -n $aksName -g $resourceGroupName --enable-managed-identity --kubernetes-version 1.21.7 --node-count 1 | ConvertFrom-Json
+
+$aks = (az aks show -n $aksName -g $resourceGroupName | ConvertFrom-Json) # retrieve existing AKS
+
+az aks get-credentials -n $aksName -g $resourceGroupName
+
+
+echo "Creating Key Vault..."
+$keyVault = az keyvault create -n $keyVaultName -g $resourceGroupName -l $location --retention-days 7 | ConvertFrom-Json
+# $keyVault = (az keyvault show -n $keyVaultName | ConvertFrom-Json) # retrieve existing KV
+
+echo "Creating Secrets in Key Vault..."
+az keyvault secret set --name $secret1Name --value "cV8ou1Qg2" --vault-name $keyVaultName
+az keyvault secret set --name $secret2Name --value "sqladmingZx5650" --vault-name $keyVaultName
+
+#Enable CSI driver
+az aks enable-addons --addons azure-keyvault-secrets-provider --name $aksName --resource-group $resourceGroupName
+
+#Enable pod identity
+az feature register --name EnablePodIdentityPreview --namespace Microsoft.ContainerService
+az extension add --name aks-preview
+az extension update --name aks-preview
+az aks update -g $resourceGroupName -n $aksName --enable-pod-identity
+
+# Créer une identité
+$IDENTITY_RESOURCE_GROUP=$resourceGroupName
+$IDENTITY_NAME=$identityName
+az identity create --resource-group ${IDENTITY_RESOURCE_GROUP} --name ${IDENTITY_NAME}
+$IDENTITY_CLIENT_ID="$(az identity show -g ${IDENTITY_RESOURCE_GROUP} -n ${IDENTITY_NAME} --query clientId -otsv)"
+$IDENTITY_RESOURCE_ID="$(az identity show -g ${IDENTITY_RESOURCE_GROUP} -n ${IDENTITY_NAME} --query id -otsv)"
+
+# Attribuer des autorisations pour l’identité managée
+$NODE_GROUP=$(az aks show -g $resourceGroupName -n $aksName --query nodeResourceGroup -o tsv)
+$NODES_RESOURCE_ID=$(az group show -n $NODE_GROUP -o tsv --query "id")
+az role assignment create --role "Virtual Machine Contributor" --assignee "$IDENTITY_CLIENT_ID" --scope $NODES_RESOURCE_ID
+
+# Créer un pod d'identité
+$POD_IDENTITY_NAME="pod-identity-kv-"+$seffix
+$POD_IDENTITY_NAMESPACE="api"
+az aks pod-identity add --resource-group $resourceGroupName --cluster-name $aksName --namespace ${POD_IDENTITY_NAMESPACE} --name ${POD_IDENTITY_NAME} --identity-resource-id ${IDENTITY_RESOURCE_ID}
+
+# Créer un csi
+
+$secretProviderKV = @"
+apiVersion: secrets-store.csi.x-k8s.io/v1alpha1
+kind: SecretProviderClass
+metadata:
+  name: $($secretProviderClassName)
+  namespace: $($POD_IDENTITY_NAMESPACE)
+spec:
+  provider: azure
+  parameters:
+    usePodIdentity: "true"
+    useVMManagedIdentity: "false"
+    userAssignedIdentityID: ""
+    keyvaultName: $keyVaultName
+    cloudName: AzurePublicCloud
+    objects:  |
+      array:
+        - |
+          objectAlias: SQL_PASSWORD
+          objectName: SQLPASSWORD
+          objectType: secret        # object types: secret, key or cert
+          objectVersion: ""         # [OPTIONAL] object versions, default to latest if empty
+        - |
+          objectAlias: SQL_USER
+          objectName: SQLUSER
+          objectType: secret
+          objectVersion: ""
+    resourceGroup: $resourceGroupName
+    subscriptionId: $subscriptionId
+    tenantId: $tenantId         # The tenant ID of the Azure Key Vault instance   
+  secretObjects:
+    - secretName: sql-password-secret
+      data:
+      - key: password
+        objectName: SQL_PASSWORD
+      type: Opaque
+    - secretName: sql-user-secret
+      data:
+      - key: user
+        objectName: SQL_USER
+      type: Opaque      
+    
+"@
+$secretProviderKV | kubectl create -f -
+
+echo "Creating an Azure Identity..."
+$identity = az identity create -g $resourceGroupName -n $identityName | ConvertFrom-Json
+
+echo "Assigning Reader Role to new Identity for Key Vault..."
+az role assignment create --role "Reader" --assignee $identity.principalId --scope $keyVault.id
+
+---Créer une identité de pod
+az aks pod-identity add --resource-group $resourceGroupName --cluster-name $aksName --namespace ${POD_IDENTITY_NAMESPACE}  --name ${POD_IDENTITY_NAME} --identity-resource-id ${IDENTITY_RESOURCE_ID}
+
+
+---Exécuter le pod POI
+
+$podPoi = @"
+apiVersion: v1
+kind: Pod
+metadata:
+  name: poi
+  labels:
+    aadpodidbinding: $POD_IDENTITY_NAME
+    app: webapp
+    role: backend
+	tier: poi  
+  namespace: $($POD_IDENTITY_NAMESPACE)
+spec:
+  containers:
+  - name: poi
+    image: registrygzx5650.azurecr.io/poi:1.0 
+    args:
+      - --subscriptionid=$SUBSCRIPTION_ID
+      - --clientid=$IDENTITY_CLIENT_ID
+      - --resourcegroup=$IDENTITY_RESOURCE_GROUP    
+    env:        
+      - name: SQL_SERVER
+        value: sqlservergzx5650.database.windows.net
+      - name: SQL_USER
+        valueFrom:
+            secretKeyRef:
+              name: sql-user-secret
+              key: user
+      - name: SQL_PASSWORD
+        valueFrom:
+            secretKeyRef:
+              name: sql-password-secret
+              key: password
+    volumeMounts:
+    - name: vm-secrets-hacker05
+      mountPath: "/mnt/secrets-store"
+      readOnly: true
+  volumes:
+  - name: vm-secrets-hacker05
+    csi:
+      driver: secrets-store.csi.k8s.io
+      readOnly: true
+      volumeAttributes:
+        secretProviderClass: $($secretProviderClassName)
+"@
+$podPoi | kubectl create -f -
+
+
+kubectl exec -it poi -n $POD_IDENTITY_NAMESPACE ls /mnt/secrets-store
+kubectl exec -it poi -n $POD_IDENTITY_NAMESPACE cat /mnt/secrets-store/SQL_USER
+kubectl exec -it poi -n $POD_IDENTITY_NAMESPACE cat /mnt/secrets-store/SQL_PASSWORD
+
+#execute commande into container
+kubectl exec -it --namespace="api" poi -- sh
+
+# demo pod
+$demoPod=@"
+apiVersion: v1
+kind: Pod
+metadata:
+  name: demo
+  labels:
+    aadpodidbinding: $POD_IDENTITY_NAME
+  namespace: api
+spec:
+  containers:
+  - name: demo
+    image: mcr.microsoft.com/oss/azure/aad-pod-identity/demo:v1.6.3
+    args:
+      - --subscriptionid=$SUBSCRIPTION_ID
+      - --clientid=$IDENTITY_CLIENT_ID
+      - --resourcegroup=$IDENTITY_RESOURCE_GROUP
+    env:
+      - name: MY_POD_NAME
+        valueFrom:
+          fieldRef:
+            fieldPath: metadata.name
+      - name: MY_POD_NAMESPACE
+        valueFrom:
+          fieldRef:
+            fieldPath: metadata.namespace
+      - name: MY_POD_IP
+        valueFrom:
+          fieldRef:
+            fieldPath: status.podIP
+      - name: SQL_USER
+        valueFrom:
+            secretKeyRef:
+              name: sql-user-secret
+              key: user
+      - name: SQL_PASSWORD
+        valueFrom:
+            secretKeyRef:
+              name: sql-password-secret
+              key: password
+    volumeMounts:
+    - name: vm-secrets-hacker05
+      mountPath: "/mnt/secrets-store"
+      readOnly: true
+  volumes:
+  - name: vm-secrets-hacker05
+    csi:
+      driver: secrets-store.csi.k8s.io
+      readOnly: true
+      volumeAttributes:
+        secretProviderClass: $($secretProviderClassName)
+  nodeSelector:
+    kubernetes.io/os: linux
+"@
+$demoPod | kubectl create -f -
+
+kubectl exec -it demo -n $POD_IDENTITY_NAMESPACE ls /mnt/secrets-store
+kubectl exec -it demo -n $POD_IDENTITY_NAMESPACE cat /mnt/secrets-store/SQL_USER
+kubectl exec -it demo -n $POD_IDENTITY_NAMESPACE cat /mnt/secrets-store/SQL_PASSWORD

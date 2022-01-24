@@ -1,0 +1,42 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    tier: trips
+    aadpodidbinding: $POD_IDENTITY_NAME
+  name: trips
+  namespace: api
+spec:
+  containers:
+  - name: trips
+    image: registrygzx5650.azurecr.io/trips:1.0
+    args:
+      - --subscriptionid=$SUBSCRIPTION_ID
+      - --clientid=$IDENTITY_CLIENT_ID
+      - --resourcegroup=$IDENTITY_RESOURCE_GROUP  
+    env:        
+      - name: SQL_SERVER
+        value: sqlservergzx5650.database.windows.net
+      - name: SQL_USER
+        valueFrom:
+            secretKeyRef:
+              name: sql-user-secret
+              key: user
+      - name: SQL_PASSWORD
+        valueFrom:
+            secretKeyRef:
+              name: sql-password-secret
+              key: password
+      - name: OPENAPI_DOCS_URI
+        value: http://localhost
+    volumeMounts:
+    - name: vm-secrets-hacker05
+      mountPath: "/mnt/secrets-store"
+      readOnly: true
+  volumes:
+  - name: vm-secrets-hacker05
+    csi:
+      driver: secrets-store.csi.k8s.io
+      readOnly: true
+      volumeAttributes:
+        secretProviderClass: $($secretProviderClassName)
