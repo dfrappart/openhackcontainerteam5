@@ -4,7 +4,7 @@ metadata:
   name: userjava-service
   namespace: api
 spec:
-  type: LoadBalancer
+  type: ClusterIP
   selector:
     tier: user-java
   ports:
