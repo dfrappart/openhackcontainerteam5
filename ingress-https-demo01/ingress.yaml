@@ -1,0 +1,31 @@
+## The ingress should be in the same namespace or use the external name
+# https://stackoverflow.com/questions/59844622/ingress-configuration-for-k8s-in-different-namespaces
+
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-web
+  namespace: web
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    cert-manager.io/cluster-issuer: letsencrypt
+    # nginx.ingress.kubernetes.io/rewrite-target: /$1
+spec:
+  tls:
+  - hosts:
+    - frontend.20.82.169.41.nip.io
+    secretName: cert-demo
+  rules:
+  - host: frontend.20.82.169.41.nip.io # change the IP address here
+    http:
+      paths:
+      - path: /(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: demo-service 
+            port:
+              number: 80
